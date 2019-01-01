@@ -4,6 +4,10 @@ Fermistat
 
 Arduino-based temp & humidity controller for my fermentation chamber.
 
+## Controls
+
+The LCD keypad is used to set the desired temp & humidity. Temp is set with `UP` and `DOWN`, Humidity is set with `LEFT` and `RIGHT`. In order for these set values to persist after a power cycle, you must press `SELECT` after setting the desired values. There is currently no feedback on the screen for saved values. Connect to the Serial monitor to see the values loaded on startup and when the values are saved. 
+
 ## Hardware
 
 * [Arduino Deumilanova](https://www.arduino.cc/en/Main/arduinoBoardDuemilanove) with upgraded ATmega328P
@@ -18,7 +22,3 @@ Arduino-based temp & humidity controller for my fermentation chamber.
 * [CheapLCD](https://github.com/kdhooper/arduino-CheapLCD) v0.9.1 by Daniel Hooper, which uses the standard LiquidCrystal library under the hood but adds convenient keypad accessors
 * [DHT sensor library](https://github.com/adafruit/DHT-sensor-library) v1.3.0 by Adafruit, requires [Adafruit_Sensor](https://github.com/adafruit/Adafruit_Sensor)
 * [arduino-timer](https://github.com/contrem/arduino-timer) v1.0.0 by Michael Contreras
-
-## To Do
-
-* Currently DOES NOT SAVE set temp/humidity after reset/power cycle. Need to store in EEPROM.

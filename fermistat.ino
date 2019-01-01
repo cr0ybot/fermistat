@@ -4,13 +4,14 @@
  * See README for hardware & library info
  *
  * @file fermistat.ino
- * @version 1.0.0
+ * @version 1.1.0
  *
  * @author    Cory Hughart
  * @copyright Cory Hughart 2019
  * @license   MIT
  */
 
+#include <EEPROM.h>
 #include <CheapLCD.h>
 #include <DHT.h> // Requires Adafruit_Sensor: https://github.com/adafruit/Adafruit_Sensor
 #include <timer.h>
@@ -29,6 +30,10 @@
 #define HUMI_MIN   0
 #define HUMI_MAX   99
 #define HUMI_RANGE 2
+
+// Memory addresses 
+#define MEM_TEMP   0
+#define MEM_HUMI   1
 
 // Other constants
 #define SENSOR_INTERVAL 2000
@@ -51,17 +56,16 @@ int humidityVal = 0;
 int tempCVal = 0;
 int tempFVal = 0;
 
-// Temp & Humidity control values
-// @todo Get & set via EEPROM so power interruptions don't lose set values
-int setTemp = 30;
-int setHumidity = 72;
+// Temp & Humidity control values (ideal for koji)
+byte setTemp = 30;
+byte setHumidity = 70;
 
 // Controller output states
 int heatState = OFF;
 int humidifierState = OFF;
 
 void setup() {
-  //Serial.begin(9600);
+  Serial.begin(9600);
 
   // Prevent accidental trigger on startup (relay on if LOW)
   heatOff();
@@ -70,6 +74,9 @@ void setup() {
   // Controller pin modes
   pinMode(heatOutput, OUTPUT);
   pinMode(humidifierOutput, OUTPUT);
+
+  loadSetTemp();
+  loadSetHumidity();
 
   // Initialize sensor
   dht.begin();
@@ -205,7 +212,10 @@ void checkKeypad() {
           humidityDown();
           break;
         case BTN_SELECT:
-          // Refresh display
+          // Temp & Humidity settings are only saved on SELECT to reduce writes to EEPROM
+          saveSetTemp();
+          saveSetHumidity();
+          // Refresh display, why not
           displayAll();
           break;
         default:
@@ -253,6 +263,21 @@ void tempDown() {
   }
   displaySetTemp();
 }
+void loadSetTemp() {
+  byte m = 0;
+  EEPROM.get(MEM_TEMP, m);
+  Serial.print("Got saved temp: ");
+  Serial.println(m);
+  if (m != setTemp && m >= TEMP_MIN && m <= TEMP_MAX) {
+    setTemp = m;
+    displaySetTemp();
+  }
+}
+void saveSetTemp() {
+  EEPROM.update(MEM_TEMP, setTemp);
+  Serial.print("Temp setting saved: ");
+  Serial.println(setTemp);
+}
 
 
 //
@@ -289,6 +314,21 @@ void humidityDown() {
     setHumidity = HUMI_MIN;
   }
   displaySetHumidity();
+}
+void loadSetHumidity() {
+  byte m = 0;
+  EEPROM.get(MEM_HUMI, m);
+  Serial.print("Got saved humidity: ");
+  Serial.println(m);
+  if (m != setHumidity && m >= HUMI_MIN && m <= HUMI_MAX) {
+    setHumidity = m;
+    displaySetHumidity();
+  }
+}
+void saveSetHumidity() {
+  EEPROM.update(MEM_HUMI, setHumidity);
+  Serial.print("Humidity setting saved: ");
+  Serial.println(setHumidity);
 }
 
 
